@@ -1,0 +1,43 @@
+services:
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: bip
+      POSTGRES_USER: bip
+      POSTGRES_PASSWORD: bip
+    volumes:
+      - ./db/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql
+      - ./db/seed.sql:/docker-entrypoint-initdb.d/02-seed.sql
+    ports:
+      - "5432:5432"
+
+  ejb:
+    build:
+      context: .
+      dockerfile: ejb-app/Dockerfile
+    ports:
+      - "8081:8080"
+    depends_on:
+      - db
+
+  backend:
+    build:
+      context: .
+      dockerfile: backend-module/Dockerfile
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/bip
+      SPRING_DATASOURCE_USERNAME: bip
+      SPRING_DATASOURCE_PASSWORD: bip
+      EJB_TRANSFER_BASE_URL: http://ejb:8080/ejb-app/api
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+      - ejb
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "4200:80"
+    depends_on:
+      - backend

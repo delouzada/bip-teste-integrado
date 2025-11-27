@@ -1,0 +1,84 @@
+<section class="page">
+  <div class="header">
+    <p class="eyebrow">Catalogo</p>
+    <h1>Beneficios</h1>
+    <p class="sub">Cadastre, edite e acompanhe beneficos antes de transferir valores.</p>
+  </div>
+
+  <div class="layout">
+    <div class="panel card">
+      <div class="panel-head">
+        <h2>{{ editandoId ? 'Editar Beneficio' : 'Novo Beneficio' }}</h2>
+        <span *ngIf="editandoId" class="pill">Editando #{{ editandoId }}</span>
+      </div>
+      <form [formGroup]="form" (ngSubmit)="salvar()" novalidate>
+        <label>
+          <span>Nome</span>
+          <input type="text" formControlName="nome" placeholder="Plano Premium" />
+        </label>
+        <label>
+          <span>Descricao</span>
+          <textarea formControlName="descricao" rows="2" placeholder="Cobertura de ..."></textarea>
+        </label>
+        <div class="row">
+          <label>
+            <span>Valor</span>
+            <input type="number" formControlName="valor" step="0.01" placeholder="150.00" />
+          </label>
+          <label class="checkbox">
+            <input type="checkbox" formControlName="ativo" />
+            <span>Ativo</span>
+          </label>
+        </div>
+        <div class="actions">
+          <button type="button" class="ghost" *ngIf="editandoId" (click)="cancelarEdicao()">Cancelar</button>
+          <button type="submit" [disabled]="form.invalid || salvando">
+            <span *ngIf="!salvando">Salvar</span>
+            <span class="spinner" *ngIf="salvando"></span>
+          </button>
+        </div>
+      </form>
+      <div class="status" *ngIf="mensagem" [ngClass]="mensagemTipo">{{ mensagem }}</div>
+    </div>
+
+    <div class="card list-card">
+      <div class="list-head">
+        <h2>Lista</h2>
+        <button class="ghost" (click)="carregar()" [disabled]="carregando">
+          <span *ngIf="!carregando">Recarregar</span>
+          <span class="spinner" *ngIf="carregando"></span>
+        </button>
+      </div>
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Nome</th>
+              <th>Valor</th>
+              <th>Ativo</th>
+              <th>Acoes</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let b of beneficios">
+              <td>{{ b.id }}</td>
+              <td>{{ b.nome }}</td>
+              <td>R$ {{ b.valor | number:'1.2-2' }}</td>
+              <td>
+                <span class="badge" [ngClass]="b.ativo ? 'on' : 'off'">{{ b.ativo ? 'Sim' : 'Nao' }}</span>
+              </td>
+              <td class="acoes">
+                <button class="ghost" (click)="editar(b)">Editar</button>
+                <button class="ghost danger" (click)="excluir(b.id)">Excluir</button>
+              </td>
+            </tr>
+            <tr *ngIf="beneficios.length === 0">
+              <td colspan="5" class="vazio">Nenhum beneficio cadastrado.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>

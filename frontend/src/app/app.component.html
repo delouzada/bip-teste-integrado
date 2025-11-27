@@ -1,0 +1,13 @@
+<main class="shell">
+  <header class="topbar">
+    <div class="brand">BIP</div>
+    <nav>
+      <a routerLink="/beneficios" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Beneficios</a>
+      <a routerLink="/transferir" routerLinkActive="active">Transferencias</a>
+    </nav>
+  </header>
+
+  <section class="view">
+    <router-outlet></router-outlet>
+  </section>
+</main>
