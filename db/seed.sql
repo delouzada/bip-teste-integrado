@@ -1,3 +1,3 @@
-INSERT INTO BENEFICIO (NOME, DESCRICAO, VALOR, ATIVO) VALUES
-('Beneficio A', 'Descrição A', 1000.00, TRUE),
-('Beneficio B', 'Descrição B', 500.00, TRUE);
+INSERT INTO beneficio (nome, descricao, valor, ativo, versao)
+VALUES ('Vale Refeição', 'Alimentação mensal', 500.00, TRUE, 0),
+       ('Vale Transporte', 'Transporte urbano', 300.00, TRUE, 0);

@@ -1,25 +1,42 @@
 package com.example.ejb;
 
 import jakarta.ejb.Stateless;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.*;
+import jakarta.transaction.Transactional;
+
 import java.math.BigDecimal;
 
 @Stateless
 public class BeneficioEjbService {
 
-    @PersistenceContext
+    @PersistenceContext(unitName = "default")
     private EntityManager em;
 
-    public void transfer(Long fromId, Long toId, BigDecimal amount) {
-        Beneficio from = em.find(Beneficio.class, fromId);
-        Beneficio to   = em.find(Beneficio.class, toId);
+    @Transactional
+    public void transferir(Long fromId, Long toId, BigDecimal valor) {
+        if (fromId == null || toId == null) {
+            throw new IllegalArgumentException("IDs nao podem ser nulos");
+        }
+        if (fromId.equals(toId)) {
+            throw new IllegalArgumentException("Nao e permitido transferir para o mesmo beneficio");
+        }
+        if (valor == null || valor.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("Valor deve ser positivo");
+        }
 
-        // BUG: sem validações, sem locking, pode gerar saldo negativo e lost update
-        from.setValor(from.getValor().subtract(amount));
-        to.setValor(to.getValor().add(amount));
+        Beneficio origem = em.find(Beneficio.class, fromId, LockModeType.PESSIMISTIC_WRITE);
+        Beneficio destino = em.find(Beneficio.class, toId, LockModeType.PESSIMISTIC_WRITE);
 
-        em.merge(from);
-        em.merge(to);
+        if (origem == null || destino == null) {
+            throw new EntityNotFoundException("Beneficio origem/destino nao encontrado");
+        }
+
+        if (!Boolean.TRUE.equals(origem.getAtivo()) || !Boolean.TRUE.equals(destino.getAtivo())) {
+            throw new IllegalStateException("Ambos os beneficios devem estar ativos");
+        }
+
+        origem.debitar(valor);
+        destino.creditar(valor);
     }
 }
+
